@@ -245,7 +245,7 @@ log_debug(char* fmt, ...)
 }
 
 // Sets a GPIO to either GPIO_MODE_IN(=0) or GPIO_MODE_OUT(=1)
-static void
+void
 gpio_set_mode(uint32_t pin, uint32_t mode)
 {
     uint32_t fsel = gpio_reg[GPIO_FSEL0 + pin/10];
@@ -256,7 +256,7 @@ gpio_set_mode(uint32_t pin, uint32_t mode)
 }
 
 // Sets the gpio to input (level=1) or output (level=0)
-static void
+void
 gpio_set(int pin, int level)
 {
     if (level)
