@@ -5,6 +5,10 @@
 #include <math.h>
 #include "pwm.h"
 
+// GPIO Modes (IN=0, OUT=1)
+#define GPIO_MODE_IN    0
+#define GPIO_MODE_OUT   1
+
 #define  DevAddr  0x68	//slave MPU6050 IIC device address
 
 unsigned char mpu6050_buffer[14];
