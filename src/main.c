@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "math.h"
+#include <math.h>
+#include "pwm.h"
 
 #define  DevAddr  0x68	//slave MPU6050 IIC device address
 
