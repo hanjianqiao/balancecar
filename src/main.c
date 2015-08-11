@@ -102,7 +102,7 @@ void PWM_output (int PWM_LH,int PWM_RH)
 	if (PWM_LH>1800)
 	{
 		PWM_LH=1800;
-	}	
+	}
 	if (PWM_RH<0)
 	{
 		gpio_set(22, 1);
@@ -115,7 +115,7 @@ void PWM_output (int PWM_LH,int PWM_RH)
 	if (PWM_RH>1800)
 	{
 		PWM_RH=1800;
-	}		
+	}
 	add_channel_pulse(channel, 18, 0, PWM_LH);
 	add_channel_pulse(channel, 23, 0, PWM_RH);
 
@@ -133,7 +133,8 @@ void adxl345_init(int fd)
 void AD_calculate(void)
 {
 	aaa=mpu6050_buffer[2]*256+mpu6050_buffer[3]+32768;	
-	acc=(32768-aaa*1.0)/16384;//+(2048-Get_Adc(0))*0.0005;
+	acc=(32768-aaa*1.0)/16384 - 0.06;//+(2048-Get_Adc(0))*0.0005;
+//	printf("%f\n", acc);
 	if(acc>1)
 		acc=1;
 	else if(acc<-1)
@@ -147,8 +148,8 @@ void AD_calculate(void)
 //	Kp_position=Get_Adc(3)/2000.0;
 //	Kd_position=Get_Adc(4)/5.0;
 
-	Kp_angle=100.0;
-	Kd_angle=50.0;
+	Kp_angle=800.0;
+	Kd_angle=100.0;
 	Kp_position=0.0;
 	Kd_position=0.0;
 	
