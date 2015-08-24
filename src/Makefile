@@ -14,3 +14,6 @@ prepare:
 run:
 	sudo ./$(TARGET)
 
+clean:
+	rm *~
+

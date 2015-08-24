@@ -4,6 +4,12 @@
 #include <errno.h>
 #include <math.h>
 #include "pwm.h"
+#include<fcntl.h>
+#include<string.h>
+
+#define BUFFER_LENGTH 2               ///< The buffer length (crude but fine)
+static int receive[BUFFER_LENGTH];     ///< The receive buffer from the LKM
+static int fd_speed;
 
 // GPIO Modes (IN=0, OUT=1)
 #define GPIO_MODE_IN    0
@@ -134,7 +140,7 @@ void AD_calculate(void)
 {
 	aaa=mpu6050_buffer[2]*256+mpu6050_buffer[3]+32768;	
 	acc=(32768-aaa*1.0)/16384 - 0.0545;//+(2048-Get_Adc(0))*0.0005;
-	printf("%f\n", acc);
+//	printf("%f\n", acc);
 	if(acc>1)
 		acc=1;
 	else if(acc<-1)
@@ -150,13 +156,12 @@ void AD_calculate(void)
 
 	Kp_angle=1000.0;
 	Kd_angle=100.0;
-	Kp_position=0.0;
-	Kd_position=0.0;
+	Kp_position=5.0;
+	Kd_position=100.0;
 	
 	Kalman_Filter(acc,gyro);
 
 }
-int speed_real_LH = 0,speed_real_RH = 0;
 void PWM_calculate(void)	
 {  	
 	if(angle<-40||angle>40)
@@ -165,7 +170,8 @@ void PWM_calculate(void)
 		add_channel_pulse(channel, 23, 0, 0);
 		return;
 	}
-	position_dot=(speed_real_LH+speed_real_RH)*0.5;
+	read(fd_speed, receive, BUFFER_LENGTH);
+	position_dot=(receive[0]+receive[1])*0.5;
 	position_dot_filter*=0.85;		
 	position_dot_filter+=position_dot*0.15;
 	
@@ -181,7 +187,8 @@ void PWM_calculate(void)
 	}
 	PWM =-Kp_angle*angle-Kd_angle*angle_dot-Kp_position*position-Kd_position*position_dot_filter;	
 	speed_output_LH=speed_output_RH=PWM;
-	printf("PWM: %f\n", PWM);
+	printf("%d %d %d %d\n", receive[0], receive[1], position, PWM);
+//	printf("PWM: %f\n", PWM);
 	speed_output_RH+=Turn_Need;
 	speed_output_LH-=Turn_Need;	
 	PWM_output (speed_output_LH,speed_output_RH);	
@@ -229,7 +236,11 @@ main(int argc, char **argv)
 	}
 
 	adxl345_init(fd);
-
+	fd_speed = open("/dev/balancecar", O_RDWR);             // Open the device with read/write access
+   if (fd_speed < 0){
+      perror("Failed to open the device...");
+      return errno;
+   }
 	// Setup channel
 	init_channel(channel, subcycle_time_us);
 	print_channel(channel);
@@ -241,9 +252,11 @@ main(int argc, char **argv)
 		adxl345_read_xyz(fd);
 		AD_calculate();
 		PWM_calculate();
-		speed_real_LH=0;		
-		speed_real_RH=0;
+		receive[0]=0;		
+		receive[1]=0;
 	}
+	close(fd);
+	close(fd_speed);
 	// Clear and start again
 	clear_channel_gpio(0, 18);
 	add_channel_pulse(channel, gpio, 0, 50);
