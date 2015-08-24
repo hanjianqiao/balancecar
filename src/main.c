@@ -17,7 +17,7 @@ static int fd_speed;
 
 #define  DevAddr  0x68	//slave MPU6050 IIC device address
 
-unsigned char mpu6050_buffer[14];
+unsigned char mpu6050_buffer[14];	//according to datasheet this is required
 unsigned short aaa,ggg;
 volatile float gyro,acc;
 volatile float PWM;
@@ -26,7 +26,7 @@ volatile float Kp_angle,Kd_angle,Kd_position;
 volatile float Kp_position;
 volatile float position,position_dot;
 volatile float position_dot_filter;
-volatile int Turn_Need,Speed_Need;
+volatile int Turn_Need,Speed_Need;	//work when we wanna control the move
 
 int channel = 0;
 
@@ -39,6 +39,8 @@ struct acc_dat{
 	int gz;
 };
 
+/*************************************/
+// part of Kalman filter
 float angle, angle_dot;
 float Q_angle=0.001, Q_gyro=0.003, R_angle=0.5, dt=0.01;
 
@@ -93,6 +95,7 @@ void Kalman_Filter(float angle_m,float gyro_m)
 	angle_dot = gyro_m-q_bias;
 }
 
+// control the wheels' speed
 void PWM_output (int PWM_LH,int PWM_RH)
 {
 	if (PWM_LH<0)
@@ -127,6 +130,7 @@ void PWM_output (int PWM_LH,int PWM_RH)
 
 }
 
+// initialize MPU6050 infact, haha~~
 void adxl345_init(int fd)
 {
 	wiringPiI2CWriteReg8(fd, 0x6b, 0x00);
@@ -136,11 +140,11 @@ void adxl345_init(int fd)
 	wiringPiI2CWriteReg8(fd, 0x1c, 0x01);
 }
 
+// use Kalman filter filters MPU6050 data
 void AD_calculate(void)
 {
 	aaa=mpu6050_buffer[2]*256+mpu6050_buffer[3]+32768;	
 	acc=(32768-aaa*1.0)/16384 - 0.0545;//+(2048-Get_Adc(0))*0.0005;
-//	printf("%f\n", acc);
 	if(acc>1)
 		acc=1;
 	else if(acc<-1)
@@ -149,6 +153,7 @@ void AD_calculate(void)
 	ggg=mpu6050_buffer[8]*256+mpu6050_buffer[9]+32768;
 	gyro=(32768-ggg*1.0)/131;
 	
+// 	origin code read these parameter from hardware
 //	Kp_angle=Get_Adc(1)/10.0;
 //	Kd_angle=Get_Adc(2)/1000.0;
 //	Kp_position=Get_Adc(3)/2000.0;
@@ -162,6 +167,8 @@ void AD_calculate(void)
 	Kalman_Filter(acc,gyro);
 
 }
+
+// calculate the output speed
 void PWM_calculate(void)	
 {  	
 	if(angle<-40||angle>40)
@@ -188,13 +195,13 @@ void PWM_calculate(void)
 	PWM =-Kp_angle*angle-Kd_angle*angle_dot-Kp_position*position-Kd_position*position_dot_filter;	
 	speed_output_LH=speed_output_RH=PWM;
 	printf("%d %d %d %d\n", receive[0], receive[1], position, PWM);
-//	printf("PWM: %f\n", PWM);
 	speed_output_RH+=Turn_Need;
 	speed_output_LH-=Turn_Need;	
 	PWM_output (speed_output_LH,speed_output_RH);	
 }
 
 
+// infact, MPU6050, haha~~
 struct acc_dat adxl345_read_xyz(int fd)
 {
 	struct acc_dat acc_xyz;
@@ -214,20 +221,18 @@ struct acc_dat adxl345_read_xyz(int fd)
 int
 main(int argc, char **argv)
 {
-    // Very crude...
-    if (argc == 2 && !strcmp(argv[1], "--pcm"))
-        setup(PULSE_WIDTH_INCREMENT_GRANULARITY_US_DEFAULT, DELAY_VIA_PCM);
-    else
-        setup(PULSE_WIDTH_INCREMENT_GRANULARITY_US_DEFAULT, DELAY_VIA_PWM);
-
-    // Setup demo parameters
+	// Very crude...
+	if (argc == 2 && !strcmp(argv[1], "--pcm"))
+		setup(PULSE_WIDTH_INCREMENT_GRANULARITY_US_DEFAULT, DELAY_VIA_PCM);
+	else
+		setup(PULSE_WIDTH_INCREMENT_GRANULARITY_US_DEFAULT, DELAY_VIA_PWM);
 
 	int fd;
 	struct acc_dat acc_xyz;
 
-    int demo_timeout = 10 * 1000000;
-    int gpio = 18;
-    int subcycle_time_us = SUBCYCLE_TIME_US_DEFAULT; //10ms;
+	int demo_timeout = 10 * 1000000;
+	int gpio = 18;
+	int subcycle_time_us = SUBCYCLE_TIME_US_DEFAULT; //10ms;
 
 	fd = wiringPiI2CSetup(DevAddr);
 
@@ -235,16 +240,20 @@ main(int argc, char **argv)
 		perror("I2C device setup error");	
 	}
 
-	adxl345_init(fd);
 	fd_speed = open("/dev/balancecar", O_RDWR);             // Open the device with read/write access
-   if (fd_speed < 0){
-      perror("Failed to open the device...");
-      return errno;
-   }
+	if (fd_speed < 0){
+		perror("Failed to open the device...");
+		return errno;
+	}
+
+	// init MPU6050, haha~~
+	adxl345_init(fd);
+
 	// Setup channel
 	init_channel(channel, subcycle_time_us);
 	print_channel(channel);
-	
+
+	// control output direction
 	gpio_set_mode(17, GPIO_MODE_OUT);
 	gpio_set_mode(22, GPIO_MODE_OUT);
 
@@ -255,8 +264,10 @@ main(int argc, char **argv)
 		receive[0]=0;		
 		receive[1]=0;
 	}
+
 	close(fd);
 	close(fd_speed);
+
 	// Clear and start again
 	clear_channel_gpio(0, 18);
 	add_channel_pulse(channel, gpio, 0, 50);

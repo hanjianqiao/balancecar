@@ -1,3 +1,7 @@
+/*
+ * I get the code from http://derekmolloy.ie/writing-a-linux-kernel-module-part-2-a-character-device/
+ * I modified some code.
+ */
 /**
  * @file   ebbchar.c
  * @author Derek Molloy
