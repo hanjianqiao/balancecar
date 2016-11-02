@@ -9,6 +9,8 @@ default:
 	make ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KDIR) M=$(PWD) modules
 
 clean:
-	rm *.o Module.symvers modules.order $(TARGET).ko $(TARGET).mod.c *~
+	rm -f *.o Module.symvers modules.order $(TARGET).ko $(TARGET).mod.c *~
+	rm -f .$(TARGET).*.cmd
+	rm -rf .tmp_versions
 
 
