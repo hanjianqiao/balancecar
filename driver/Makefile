@@ -1,7 +1,7 @@
 TARGET = speed
-KDIR := /home/hjq/xeno/linux
+KDIR := ~/pi/work/xenomai-2.6/linux
 ARCH = arm
-CROSS_COMPILE = /home/hjq/xeno/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-
+CROSS_COMPILE = ~/pi/git/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-
 PWD := $(shell pwd)
 obj-m = $(TARGET).o
 
