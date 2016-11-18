@@ -1,5 +1,5 @@
 TARGET = speed
-KDIR := ~/pi/work/xenomai-2.6/linux
+KDIR := ~/pi/work/raspberry/linux-rpi-3.8.y/
 ARCH = arm
 CROSS_COMPILE = ~/pi/git/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-
 PWD := $(shell pwd)
