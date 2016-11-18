@@ -1,11 +1,11 @@
 TARGET = balancecar.la
 SUBFILES += main.c
-SUBFILES += pwm.c
+SUBFILES += pwm.c libMotionSensor.a libI2Cdev.a
 OPTIONS += -lm
 OPTIONS += -lwiringPi
 
 default:
-	gcc $(SUBFILES) -o $(TARGET) $(OPTIONS)
+	gcc $(SUBFILES) -o $(TARGET) $(OPTIONS) 
 
 prepare:
 	sudo modprobe i2c-bcm2708
