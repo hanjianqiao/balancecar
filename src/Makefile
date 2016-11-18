@@ -1,6 +1,6 @@
 TARGET = balancecar.la
 SUBFILES += main.c
-SUBFILES += pwm.c libMotionSensor.a libI2Cdev.a
+SUBFILES += pwm.c libMotionSensor.a libI2Cdev.a -I../git/chip_MPU6050/src/
 OPTIONS += -lm
 OPTIONS += -lwiringPi
 

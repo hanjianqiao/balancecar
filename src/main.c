@@ -141,7 +141,7 @@ void AD_calculate(void)
 	acc=57.3*asin(acc);
 	ggg=gyro[0]+32768;
 	gyr=(32768-ggg*1.0)/131;
-	
+	printf("acc and gyr: %f, %f\n", acc, gyr);
 // 	origin code read these parameter from hardware
 //	Kp_angle=Get_Adc(1)/10.0;
 //	Kd_angle=Get_Adc(2)/1000.0;
@@ -207,10 +207,6 @@ main(int argc, char **argv)
 	int subcycle_time_us = SUBCYCLE_TIME_US_DEFAULT; //10ms;
 
 	ms_open();
-
-	if(-1 == fd){
-		perror("I2C device setup error");	
-	}
 
 	fd_speed = open("/dev/balancecar", O_RDWR);             // Open the device with read/write access
 	if (fd_speed < 0){
