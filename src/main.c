@@ -107,9 +107,9 @@ void PWM_output (int PWM_LH,int PWM_RH)
 		gpio_set(17, 0);
 	}
 	
-	if (PWM_LH>1800)
+	if (PWM_LH>2800)
 	{
-		PWM_LH=1800;
+		PWM_LH=2800;
 	}
 	if (PWM_RH<0)
 	{
@@ -120,9 +120,9 @@ void PWM_output (int PWM_LH,int PWM_RH)
 	{
 		gpio_set(22, 0);
 	}	
-	if (PWM_RH>1800)
+	if (PWM_RH>2800)
 	{
-		PWM_RH=1800;
+		PWM_RH=2800;
 	}
 	add_channel_pulse(channel, 18, 0, PWM_LH);
 	add_channel_pulse(channel, 23, 0, PWM_RH);
@@ -133,7 +133,7 @@ void PWM_output (int PWM_LH,int PWM_RH)
 void AD_calculate(void)
 {
 	aaa=accel[1]+32768;	
-	acc=(32768-aaa*1.0)/16384 - 0.0545;//+(2048-Get_Adc(0))*0.0005;
+	acc=(32768-aaa*1.0)/16384 - 0.0022;//+(2048-Get_Adc(0))*0.0005;
 	if(acc>1)
 		acc=1;
 	else if(acc<-1)
